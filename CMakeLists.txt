@@ -3,8 +3,14 @@ project(onionpir VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 14)
 
-find_package(SEAL 3.5.1 EXACT REQUIRED PATHS /usr/local/lib/libseal-3.5.a)
-include_directories("/usr/local/include")
+find_package(SEAL 3.5.1 EXACT REQUIRED PATHS /root/dhtpir-ipfs/.libs/lib/cmake/SEAL-3.5)
+
+# include_directories("/usr/local/include")
+
+# Specify the path to the SEAL library
+#link_directories("/root/dhtpir-ipfs/.libs/lib")
+
+include_directories("/root/dhtpir-ipfs/.libs/include")
 
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -45,4 +51,4 @@ target_link_libraries(onionpir PRIVATE SEAL::seal)
 #for mac
 #target_link_libraries(external_prod PRIVATE /usr/local/lib/libnfllib.dylib)
 
-target_link_libraries(onionpir PRIVATE /usr/local/lib/libnfllib_static.a)
+target_link_libraries(onionpir PRIVATE /root/dhtpir-ipfs/.libs/lib/libnfllib_static.a)

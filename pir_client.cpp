@@ -42,6 +42,25 @@ GaloisKeys pir_client::generate_galois_keys() {
     return keygen_->galois_keys_local(galois_elts);
 }
 
+Serializable<GaloisKeys> pir_client::generate_galois_keys_serial() {
+    // Generate the Galois keys needed for coeff_select.
+    //check https://github.com/microsoft/SealPIR/blob/dd06e2ff10d966177dc9892e92852e60add3f8b6/pir_client.cpp#L137
+    //In the polynomial view (not batching), a Galois automorphism by a Galois element p changes
+    //        Enc(plain(x)) to Enc(plain(x^p)).
+
+    std::vector<uint32_t> galois_elts;
+    const auto &context_data = newcontext_->first_context_data();
+    auto &parms = context_data->parms();
+    int N = parms.poly_modulus_degree();
+    int logN = seal::util::get_power_of_two(N);
+    for (int i = 0; i < logN; i++) {
+        galois_elts.push_back((N + seal::util::exponentiate_uint64(2, i)) / seal::util::exponentiate_uint64(2, i));
+
+    }
+
+    return keygen_->galois_keys(galois_elts);
+}
+
 uint64_t pir_client::get_fv_index(uint64_t element_idx, uint64_t ele_size) {
     auto N = params_.poly_modulus_degree();
     auto logt = params_.plain_modulus().bit_count();
@@ -261,9 +280,9 @@ PirQuery pir_client::generate_query_combined(uint64_t desiredIndex) {
 
             result[i]=(packed_ct);
 
-//            Plaintext ppt;
-//            decryptor_->decrypt(result[i][2],ppt);
-//            cout<<ppt.to_string()<<endl;
+        //    Plaintext ppt;
+        //    decryptor_->decrypt(result[i][2],ppt);
+        //    cout<<ppt.to_string()<<endl;
         }
     }
 

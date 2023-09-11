@@ -16,6 +16,7 @@ public:
               const PirParams &pirparms);
 
     GaloisKeys generate_galois_keys();
+    Serializable<GaloisKeys> generate_galois_keys_serial();
     PirQuery generate_query(std::uint64_t desiredIndex);
 
     PirQuery generate_query_combined(std::uint64_t desiredIndex);

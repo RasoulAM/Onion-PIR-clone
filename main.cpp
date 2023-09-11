@@ -893,15 +893,28 @@ void test_seal(Evaluator &evaluator1, Encryptor &encryptor1, Decryptor &decrypto
 //    return 0;
 //}
 
-int main(){
+int main(int argc, char *argv[]){
 
-    uint64_t number_of_items = 1<<14;
+    uint64_t number_of_items = 1<<8;
     uint64_t size_per_item = 30000; // in bytes
     uint32_t N = 4096;
 
     // Recommended values: (logt, d) = (12, 2) or (8, 1).
     uint32_t logt = 60;
     PirParams pir_params;
+
+    // Get number of items and size per item from command line
+    if (argc <= 1) {
+        cout << "Usage: ./onionpir <number_of_items> <size_per_item>" << endl;
+        return 1;
+    }
+    number_of_items = atoi(argv[1]);
+
+    if (argv[2] == NULL) {
+        size_per_item = N*logt / 8;
+    } else {
+        size_per_item = atoi(argv[2]);
+    }
 
 
     EncryptionParameters parms(scheme_type::BFV);
@@ -953,6 +966,9 @@ int main(){
     // Initialize PIR client....
     pir_client client(parms, pir_params);
     GaloisKeys galois_keys = client.generate_galois_keys();
+    Serializable<GaloisKeys> galois_keys_serial = client.generate_galois_keys_serial();
+    stringstream ss;
+    cout << "Gal keys Size: " << galois_keys.save(ss)/1024 << " KB" << endl;
 
     cout << "Main: Setting Galois keys...";
     server.set_galois_key(0, galois_keys);
@@ -974,6 +990,15 @@ int main(){
     auto time_query_s = high_resolution_clock::now();
     PirQuery query = client.generate_query_combined(index);
 
+    uint64_t query_size = 0;
+    ss.str("");
+    for (uint64_t i = 0; i < query.size(); i++) {
+        for (uint64_t j = 0; j < query[i].size(); j++) {
+            query_size += query[i][j].save(ss);
+        }
+    }
+    cout << "Query Size: " << query_size/1024 << " KB" << endl;
+
     cout<<"Main: query size = "<< query.size()<< endl;
 
     auto time_query_e = high_resolution_clock::now();
@@ -990,6 +1015,15 @@ int main(){
     PirReply reply = server.generate_reply_combined(query, 0, sk);
     auto time_server_e = high_resolution_clock::now();
     auto time_server_us = duration_cast<microseconds>(time_server_e - time_server_s).count();
+
+    uint64_t reply_size = 0;
+    ss.str("");
+    for (uint64_t i = 0; i < query.size(); i++) {
+        for (uint64_t j = 0; j < query[i].size(); j++) {
+            reply_size += query[i][j].save(ss);
+        }
+    }
+    cout << "Reply Size: " << reply_size/1024 << " KB" << endl;
 
     Plaintext rep= client.decrypt_result(reply);
 
