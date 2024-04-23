@@ -1009,6 +1009,14 @@ int main(int argc, char *argv[]){
     SecretKey sk = client.get_decryptor();
 
     GSWCiphertext enc_sk=client.get_enc_sk();
+    uint64_t sk_enc_size = 0;
+    ss.str("");
+    for (uint64_t i = 0; i < enc_sk.size(); i++) {
+        sk_enc_size += enc_sk[i].save(ss);
+    }
+    // Divided by 2 to account for seeding
+    cout << "Encrypted Secret Key Size: " << sk_enc_size/2/1024 << " KB" << endl;
+    
     server.set_enc_sk(enc_sk);
 
     auto time_server_s = high_resolution_clock::now();
