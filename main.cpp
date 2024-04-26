@@ -1026,10 +1026,8 @@ int main(int argc, char *argv[]){
 
     uint64_t reply_size = 0;
     ss.str("");
-    for (uint64_t i = 0; i < query.size(); i++) {
-        for (uint64_t j = 0; j < query[i].size(); j++) {
-            reply_size += query[i][j].save(ss);
-        }
+    for (uint64_t i = 0; i < reply.size(); i++) {
+        reply_size += reply[i].save(ss);
     }
     cout << "Reply Size: " << reply_size/1024 << " KB" << endl;
 
